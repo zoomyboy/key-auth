@@ -15,6 +15,6 @@ class CreateAuthKeysTable extends Migration {
     }
 
     public function down() {
-        
+        Schema::dropIfExists('auth_keys');
     }
 }

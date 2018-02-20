@@ -17,7 +17,7 @@ class Guard {
     }
 
     public function check() {
-        
+        return $this->user() != null;
     }   
 
     public function guest() {
@@ -74,7 +74,7 @@ class Guard {
     public static function routes() {
         Route::get('/auth/key/{key}', function($key) {
             auth()->guard('key')->login($key);
-            return redirect()->to(request()->get('url'));
-        });
+            return redirect()->to(rawurldecode(request()->get('url')));
+        })->middleware('web');
     }
 }
