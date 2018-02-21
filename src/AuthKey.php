@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class AuthKey extends Model {
     public $timestamps = false;
 
-    public $fillable = ['key'];
+    public $fillable = ['key', 'guard'];
 
     public function model() {
         return $this->morphTo();

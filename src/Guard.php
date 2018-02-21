@@ -11,9 +11,11 @@ use Illuminate\Support\Facades\Route;
 class Guard {
     public $user;
     public $session;
+    protected $guard;
 
-    public function __construct(Session $session) {
+    public function __construct(Session $session, $guard = null) {
         $this->session = $session;
+        $this->guard = $guard ?: config('auth.defaults.key');
     }
 
     public function check() {
@@ -45,17 +47,17 @@ class Guard {
     public function logout() {
         $this->fetchKeyFromSession()->delete();
 
-        $this->session->forget('auth.key');
+        $this->session->forget('auth.'.$this->guard.'.key');
     }
 
     public function login($key) {
-        $key = AuthKey::where('key', $key)->first();
+        $key = AuthKey::where('key', $key)->where('guard', $this->guard)->first();
 
         if (is_null($key)) {
             throw new UnauthorizedHttpException('Basic', 'Invalid credentials.');
         }
 
-        $this->session->put('auth.key', $key->key);
+        $this->session->put('auth.'.$this->guard.'.key', $key->key);
     }
 
 
@@ -66,14 +68,15 @@ class Guard {
      * @return null If no userf logged in
      */
     private function fetchKeyFromSession() {
-        $key = $this->session->get('auth.key');
+        $key = $this->session->get('auth.'.$this->guard.'.key');
 
-        return AuthKey::where('key', $key)->first();
+        return AuthKey::where('key', $key)->where('guard', $this->guard)->first();
     }
 
     public static function routes() {
         Route::get('/auth/key/{key}', function($key) {
-            auth()->guard('key')->login($key);
+            $guard = request()->get('guard') ?: config('auth.defaults.key');
+            auth()->guard($guard)->login($key);
             return redirect()->to(rawurldecode(request()->get('url')));
         })->middleware('web');
     }

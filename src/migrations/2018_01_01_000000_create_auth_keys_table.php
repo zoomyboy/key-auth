@@ -11,6 +11,7 @@ class CreateAuthKeysTable extends Migration {
             $table->string('key', 255);
             $table->integer('model_id');
             $table->string('model_type');
+            $table->string('guard');
         });       
     }
 
